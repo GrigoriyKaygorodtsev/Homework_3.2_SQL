@@ -1,15 +1,20 @@
 package ru.netology.banklogin.test;
 
+import com.codeborne.selenide.Configuration;
 import org.junit.jupiter.api.*;
+import org.openqa.selenium.chrome.ChromeOptions;
 import ru.netology.banklogin.data.DataHelper;
 import ru.netology.banklogin.data.SQLHelper;
 import ru.netology.banklogin.page.LoginPage;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static com.codeborne.selenide.Selenide.open;
 import static ru.netology.banklogin.data.SQLHelper.cleanAuthCodes;
 import static ru.netology.banklogin.data.SQLHelper.cleanDatabase;
-
 public class BankLoginTest {
+
     LoginPage loginPage;
 
     @AfterEach
@@ -23,6 +28,14 @@ public class BankLoginTest {
 
     @BeforeEach
     void setUp() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        Map<String, Object> prefs = new HashMap<String, Object>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("password_manager_enabled", false);
+        options.setExperimentalOption("prefs", prefs);
+        Configuration.browserCapabilities = options;
+
         loginPage = open("http://localhost:9999", LoginPage.class);
     }
 
@@ -51,8 +64,8 @@ public class BankLoginTest {
         var verificationPage = loginPage.validLogin(authInfo);
         verificationPage.verifyVerificationPageVisiblity();
         var verificationCode = DataHelper.generateRandomVerificationCode();
-        verificationPage.verify(verificationCode.getCode);
-        verificationPage.verifiErrorNotification("Ошибка! \nНеверно указан код! Попробуйте еще разю");
+        verificationPage.verify(verificationCode.getCode());
+        verificationPage.verifiErrorNotification("Ошибка! \nНеверно указан код! Попробуйте еще раз.");
     }
 
 }
